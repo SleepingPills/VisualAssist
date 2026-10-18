@@ -13,13 +13,12 @@ public class GrenadeThrowPrefixPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(Player.BaseGrenadeHandsController).GetMethod(nameof(Player.BaseGrenadeHandsController.method_9));
+        return typeof(Player.BaseGrenadeHandsController).GetMethod(nameof(Player.BaseGrenadeHandsController.ThrowGrenadeInner));
     }
 
     [PatchPrefix]
     public static bool Prefix(
-        Player.BaseGrenadeHandsController __instance, Player ____player, Transform ___transform_1, bool lowThrow, float timeSinceSafetyLevelRemoved,
-        GrenadePrefab ___grenadePrefab_0
+        Player.BaseGrenadeHandsController __instance, Player ____player, Transform ____grenadeTransform, bool lowThrow, float timeSinceSafetyLevelRemoved
     )
     {
         var grenadeArc = Singleton<GrenadeArc>.Instance;
@@ -30,8 +29,8 @@ public class GrenadeThrowPrefixPatch : ModulePatch
             || !Plugin.GrenadeArcEnabled.Value)
             return true;
 
-        __instance.vmethod_2(
-            timeSinceSafetyLevelRemoved, grenadeArc.GrenadeThrow.ThrowPosition, ___transform_1.rotation, grenadeArc.GrenadeThrow.ThrowForce, lowThrow
+        __instance.ThrowGrenade(
+            timeSinceSafetyLevelRemoved, grenadeArc.GrenadeThrow.ThrowPosition, ____grenadeTransform.rotation, grenadeArc.GrenadeThrow.ThrowForce, lowThrow
         );
         
         return false;
