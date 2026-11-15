@@ -1,8 +1,9 @@
-﻿using System;
-using System.Reflection;
-using EFT;
+﻿using EFT;
+using EFT.Ballistics;
 using EFT.UI;
 using HarmonyLib;
+using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace VisualAssist;
@@ -24,7 +25,7 @@ public class GrenadeArc : MonoBehaviour
     private float _gravity;
     private const float LinearDrag = 0.1f;
     
-    private static readonly FieldInfo GrenadePrefabField = AccessTools.Field(typeof(Player.GrenadeHandsController), "grenadePrefab_0");
+    private static readonly FieldInfo GrenadePrefabField = AccessTools.Field(typeof(Player.GrenadeHandsController), "GrenadePrefab");
 
     public void Awake()
     {
@@ -94,8 +95,8 @@ public class GrenadeArc : MonoBehaviour
         var grenadeHandsController = localPlayer.HandsController as Player.GrenadeHandsController;
 
         if (grenadeHandsController == null
-            || (grenadeHandsController.CurrentOperation is not Player.GrenadeHandsController.Class1275
-                && grenadeHandsController.CurrentOperation is not Player.GrenadeHandsController.Class1276))
+            || (grenadeHandsController.CurrentOperation is not Player.GrenadeHandsController.HighThrowOperation
+                && grenadeHandsController.CurrentOperation is not Player.GrenadeHandsController.LowThrowOperation))
         {
             _line.enabled = false;
             _sphereRenderer.enabled = false;
@@ -105,8 +106,7 @@ public class GrenadeArc : MonoBehaviour
         if (!_line.enabled)
             _line.enabled = true;
 
-        // Class1156 is high throw 1157 low throw
-        var isLowThrow = grenadeHandsController.CurrentOperation is Player.GrenadeHandsController.Class1276;
+        var isLowThrow = grenadeHandsController.CurrentOperation is Player.GrenadeHandsController.LowThrowOperation;
         GrenadeThrow = CalculateGrenadeThrow(isLowThrow);
 
         if (grenadeHandsController.Item != null && _itemName != grenadeHandsController.Item.Name)
@@ -254,7 +254,7 @@ public class GrenadeArc : MonoBehaviour
             var arcLine = candidatePos - prevPos;
 
             if (Physics.SphereCast(
-                    prevPos, 0.05f, arcLine.normalized, out var hit, arcLine.magnitude, LayerMasksDataAbstractClass.HitMask.value
+                    prevPos, 0.05f, arcLine.normalized, out var hit, arcLine.magnitude, BallisticsCalculatorConstants.HitMask.value
                 ))
             {
                 positions[i] = hit.point;
